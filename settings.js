@@ -249,8 +249,8 @@ function animate() {
 		}
 
 		// ── Emotion: happy while speaking, relaxed when idle ──
-		const happyTarget = isSpeaking ? 0.8 : 0;
-		happyVal += (happyTarget - happyVal) * 0.5;
+		const happyTarget = isSpeaking ? 0.2 : 0;
+		happyVal += (happyTarget - happyVal) * 0.09;
 		setExpr("happy", happyVal);
 		setExpr("relaxed", isSpeaking ? 0 : 0.3);
 
