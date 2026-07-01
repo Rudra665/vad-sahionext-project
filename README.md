@@ -55,3 +55,10 @@ A simple voice-driven avatar demo:
 - The frontend connects to `ws://localhost:8765`.
 - If the avatar does not load, the page falls back to a simple animated placeholder.
 - If microphone capture fails, check your audio device settings and permissions.
+
+## Task 2: How i designed a simple good looking avatar
+
+- I would first decide whether if i need light weight 2d model or complex but detailed 3d model
+- In this project i have chosen to demonstrate the 3d model using three.js and vdroid
+- vdroid give ready to use model and extreme customization option and is free.
+- In case we need a 2d simple model, we can simply use canva and make 2-3 frames depending on our need and wire them with websocket to trigger animation with the text trasmission.
