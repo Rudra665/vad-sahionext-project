@@ -8,7 +8,7 @@ def start_speak(text:str):
     # for word in text:
 
     engine = pyttsx3.init()
-    engine.setProperty('rate', 200)  # Set the speech rate 
+    engine.setProperty('rate', 150)  # Set the speech rate 
     engine.setProperty('volume', 1.0)
 
 

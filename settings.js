@@ -14,12 +14,12 @@ const VISEME_MAP = {
 	a: "aa",
 	e: "ee",
 	i: "ih",
-	o: "oh",
+	o: "oo",
 	u: "ou",
-	b: "aa",
-	p: "aa",
+	b: "ee",
+	p: "ee",
 	m: "aa",
-	f: "ih",
+	f: "aa",
 	v: "ih",
 	s: "ih",
 	z: "ih",
@@ -27,10 +27,10 @@ const VISEME_MAP = {
 	n: "ee",
 	t: "ee",
 	d: "ee",
-	l: "ee",
-	k: "oh",
-	g: "oh",
-	r: "oh",
+	l: "aa",
+	k: "aa",
+	g: "ee",
+	r: "aa",
 	w: "ou",
 	q: "ou",
 	" ": null, // silence on space
@@ -70,7 +70,7 @@ renderer.outputEncoding = 3001;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 20);
-camera.position.set(0, 0.8, 1.5);
+camera.position.set(0, 0.8, 0.85);
 
 const ambient = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambient);
@@ -127,24 +127,24 @@ function applyNaturalPose(vrm) {
 
 	// Arms spread wide open at shoulder height
 	if (leftUpperArm) {
-		leftUpperArm.rotation.set(1, -1.8, 0); // extended left
+		leftUpperArm.rotation.set(0, -1.5, 0); // extended left
 	}
 	if (leftLowerArm) {
 		leftLowerArm.rotation.set(0, 0, -0.2); // slight bend, palm back
 	}
 	if (leftHand) {
-		leftHand.rotation.set(0, -0.2, 0);
+		leftHand.rotation.set(0, 0, 0);
 	}
 
 	// Right arm: mirror
 	if (rightUpperArm) {
-		rightUpperArm.rotation.set(1, 1.8, 0); // extended right
+		rightUpperArm.rotation.set(0, 1.5, 0); // extended right
 	}
 	if (rightLowerArm) {
-		rightLowerArm.rotation.set(0, 0, 0);
+		rightLowerArm.rotation.set(0, 0, 0.2);
 	}
 	if (rightHand) {
-		rightHand.rotation.set(0, 0.2, 0);
+		rightHand.rotation.set(0, 0, 0);
 	}
 
 	// Head: neutral, slight forward tilt for attentiveness
@@ -249,31 +249,21 @@ function animate() {
 		}
 
 		// ── Emotion: happy while speaking, relaxed when idle ──
-		const happyTarget = isSpeaking ? 0.2 : 0;
-		happyVal += (happyTarget - happyVal) * 0.09;
+		const happyTarget = isSpeaking ? 0.5 : 0;
+		happyVal += (happyTarget - happyVal) * 0.05;
 		setExpr("happy", happyVal);
 		setExpr("relaxed", isSpeaking ? 0 : 0.3);
 
-		// ── Viseme sync from text ──
-		if (isSpeaking && visemeQueue.length > 0) {
-			visemeTimer += delta;
-			const visemeSpeed = 0.07; // seconds per viseme
-			if (visemeTimer >= visemeSpeed) {
-				visemeTimer = 0;
-				clearAllVisemes();
-				const currentViseme =
-					visemeQueue[visemeIdx % visemeQueue.length];
-				if (currentViseme) {
-					setExpr(currentViseme, 0.7 + Math.sin(t * 8) * 0.2);
-				}
-				visemeIdx++;
-				// loop queue until speaking stops
-				if (visemeIdx >= visemeQueue.length) visemeIdx = 0;
-			}
-		} else if (!isSpeaking) {
-			clearAllVisemes();
-			visemeIdx = 0;
-			visemeTimer = 0;
+		// ── Natural mouth animation while speaking ──
+		if (isSpeaking) {
+			// Simple mouth open/close animation
+			const viseme = ALL_VISEMES;
+			const idx = Math.floor(t * 8) % viseme.length;
+			viseme.forEach((v, i) => {
+				vrm.expressionManager?.setValue(v, i === idx ? 0.2 : 0);
+			});
+		} else {
+			setExpr("aa", 0);
 		}
 
 		vrm.update(delta);
@@ -372,9 +362,7 @@ function addHistory(transcription, keywords) {
 	const log = document.getElementById("history-log");
 	const item = document.createElement("div");
 	item.className = "history-item";
-	const now = new Date().toLocaleTimeString("en-US", {
-		hour12: false,
-	});
+	const now = new Date().toLocaleTimeString("en-US", { hour12: false });
 	item.innerHTML = `<div class="time">${now}</div>${transcription}`;
 	log.prepend(item);
 
